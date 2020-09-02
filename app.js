@@ -1,4 +1,5 @@
 //jshint esversion:6
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -20,7 +21,6 @@ mongoose.connect(URL, {
   useUnifiedTopology: true
 });
 
-
 const userSchema = new mongoose.Schema({
   email: String,
   password: String
@@ -30,8 +30,9 @@ const userSchema = new mongoose.Schema({
   add plugin to schema this will encrypt the database and use encryptedFields
   to encrypt the password thereby reducing authentication time
 */
-const secret = "ChickenDoneRightIsFarSuperior";
-userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+
+console.log(process.env.SECRET);
+userSchema.plugin(encrypt, { secret: process.env.SECRET, encryptedFields: ["password"] });
                                                 //
 
 const User = mongoose.model("User", userSchema);
