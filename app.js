@@ -2,6 +2,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const encrypt = require("mongoose-encryption");
 
 
 const app = express();    //creating a new app instance to use express
@@ -25,9 +26,17 @@ const userSchema = new mongoose.Schema({
   password: String
 });
 
+/* const secret stores our secret phrase that seeds the authentication
+  add plugin to schema this will encrypt the database and use encryptedFields
+  to encrypt the password thereby reducing authentication time
+*/
+const secret = "ChickenDoneRightIsFarSuperior";
+userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+                                                //
+
 const User = mongoose.model("User", userSchema);
 
-/*  All the get routes are below. NOTE: we do not use
+/*  GET routes are below. NOTE: we do not use
     app.get("/secrets") because that gives unfettered
     access to the secrets page;
 
@@ -74,13 +83,14 @@ app.post("/login", function(req,res) {
       console.log("Error in app.post(login): " + err);
     } else {
       if(foundUser) {
-        if(foundUser.password === password)
+        if(foundUser.password === password) { // if we found a user and the pass word matches we permissively render secrets
           res.render("secrets");
-        else
-          res.send("Login & password do not match!");
-
-
+          console.log(password);
+        }else
+          res.send("Failed login! Hit back to try again!");
       }
+      else
+        res.send("Failed login! Hit back to try again!");
     }
   });
 });
